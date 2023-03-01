@@ -73,7 +73,8 @@ class SimpleAI:
         if not self.slices_number:
             self._wages = 2*np.random.random((1, self.input_number)) - 1
         else:
-            if self.slices_number > 
+            if self.slices_number > neurons_number.size:
+                raise ValueError("Too short list of neurons number")
 
 
 x = SimpleAI(slices_number=1)

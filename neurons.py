@@ -71,11 +71,16 @@ class SimpleAI:
         if not isinstance(neurons_number, np.ndarray):
             raise TypeError("Neurons number must be a numpy array(ndarray)")
         if not self.slices_number:
-            self._wages = 2*np.random.random((1, self.input_number)) - 1
+            self._wages = [6*np.random.random((1, self.input_number)) - 3]
         else:
             if self.slices_number > neurons_number.size:
                 raise ValueError("Too short list of neurons number")
+            else:
+                self._wages = [2*np.random.random((neurons_number[0], self.input_number)) - 3]
+                for i in range(1, self.slices_number):
+                    self._wages += [6*np.random.random((neurons_number[i], neurons_number[i-1])) - 3]
+                self._wages += [6*np.random.random((1, neurons_number[self.slices_number-1])) - 3]
 
 
-x = SimpleAI(slices_number=1)
+x = SimpleAI(slices_number=2, neurons_number=np.array([4,3]))
 print(x.wages)

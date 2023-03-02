@@ -30,7 +30,7 @@ class SimpleAI:
     @sigmoid.setter
     def sigmoid(self, sigmoid):
         if isinstance(sigmoid, Sigmoid):
-            self._sigmoid = sigmoid
+            self._sigmoid = lambda t: sigmoid.result(t)
         else:
             raise TypeError("Error, enter no sigmoid class")
 
@@ -76,11 +76,29 @@ class SimpleAI:
             if self.slices_number > neurons_number.size:
                 raise ValueError("Too short list of neurons number")
             else:
-                self._wages = [2*np.random.random((neurons_number[0], self.input_number)) - 3]
+                self._wages = [6*np.random.random((neurons_number[0], self.input_number)) - 3]
                 for i in range(1, self.slices_number):
                     self._wages += [6*np.random.random((neurons_number[i], neurons_number[i-1])) - 3]
                 self._wages += [6*np.random.random((1, neurons_number[self.slices_number-1])) - 3]
 
+    def forecasting(self, input_data: np.ndarray):
+        if not isinstance(input_data, np.ndarray):
+            raise TypeError("Input data must be a numpy array(ndarray)")
+        if input_data.size != self.input_number:
+            raise ValueError("Size of input data array must be length as input number")
+        result = input_data
+        for i in self.wages:
+            result = np.array([self.sigmoid(k) for k in np.dot(i, result)])
+        return result
 
-x = SimpleAI(slices_number=2, neurons_number=np.array([4,3]))
+    def study(self, input_data: np.ndarray, result_data: np.ndarray):
+        if not isinstance(result_data, np.ndarray) or not isinstance(input_data, np.ndarray):
+            raise TypeError("Input and result data must be a numpy array(ndarray)")
+        if input_data.size != result_data.size:
+            raise ValueError("Sizes of input and result data must be the same")
+        print(input_data)
+
+
+x = SimpleAI(slices_number=1, neurons_number=np.array([4, 3]))
 print(x.wages)
+print(x.forecasting(np.array([1, 1, 1])))

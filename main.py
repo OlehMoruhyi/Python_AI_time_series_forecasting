@@ -1,42 +1,21 @@
+from neurons import SimpleAI
 import numpy as np
 
-# Сигмоида
-def nonlin(x,deriv=False):
-    if(deriv==True):
-        return x*(1-x)
-    return 1/(1+np.exp(-x))
+np.random.seed(121)
+
+sai = SimpleAI()
+
+inpt_data = np.array([[0.58, 3.38, 0.91], [3.38, 0.91, 5.80], [0.91, 5.80, 0.91], [5.80, 0.91, 5.01],
+                      [0.91, 5.01, 1.17], [5.01, 1.17, 4.67], [1.17, 4.67, 0.60], [4.67, 0.60, 4.81],
+                      [0.60, 4.81, 0.53], [4.81, 0.53, 4.75]])
+
+reslt_data = np.array([[5.80], [0.91], [5.01], [1.17], [4.67], [0.60], [4.81], [0.53], [4.75], [1.01]])
+
+inpt_data_check = np.array([[0.53, 4.75, 1.01], [4.75, 1.01, 5.04]])
+reslt_data_check = np.array([[5.04], [1.07]])
 
 
-# набор входных данных
-X = np.array([
-              [0, 0, 1],
-              [0, 1, 1],
-              [1, 0, 1],
-              [1, 1, 1]])
-
-# выходные данные
-y = np.array([[0, 0, 1, 1]]).T
-
-# сделаем случайные числа более определёнными
-np.random.seed(1)
-
-# инициализируем веса случайным образом со средним 0
-syn0 = 2 * np.random.random((3, 1)) - 1
-
-for iter in range(100000):
-    # прямое распространение
-    l0 = X
-    l1 = nonlin(np.dot(l0, syn0))
-
-    # насколько мы ошиблись?
-    l1_error = y - l1
-
-    # перемножим это с наклоном сигмоиды
-    # на основе значений в l1
-    l1_delta = l1_error * nonlin(l1, True)  # !!!
-
-    # обновим веса
-    syn0 += np.dot(l0.T, l1_delta)  # !!!
-
-print("Выходные данные после тренировки:")
-print(l1)
+sai.study(input_data=inpt_data, output_data=reslt_data)
+print("\nExpect: " + str(np.concatenate(reslt_data_check, axis=None)))
+print("\nCurrent: " + str(np.concatenate(sai.forward_propagation(inpt_data_check)["z"], axis=None)))
+print("\nMistake: " + str(np.concatenate((sai.forward_propagation(inpt_data_check)["z"] - reslt_data_check)**2, axis=None)))

@@ -17,5 +17,5 @@ reslt_data_check = np.array([[5.04], [1.07]])
 
 sai.study(input_data=inpt_data, output_data=reslt_data)
 print("\nExpect: " + str(np.concatenate(reslt_data_check, axis=None)))
-print("\nCurrent: " + str(np.concatenate(sai.forward_propagation(inpt_data_check)["z"], axis=None)))
-print("\nMistake: " + str(np.concatenate((sai.forward_propagation(inpt_data_check)["z"] - reslt_data_check)**2, axis=None)))
+print("\nCurrent: " + str(np.concatenate(sai.forward_propagation(inpt_data_check)["out"], axis=None)))
+print("\nMistake: " + str(np.concatenate((sai.forward_propagation(inpt_data_check)["out"] - reslt_data_check)**2, axis=None)))

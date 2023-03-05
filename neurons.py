@@ -73,44 +73,43 @@ class SimpleAI:
         if not isinstance(neurons_number, int):
             raise TypeError("Neurons number must be a int")
         self._wages = {}
-        self._wages["w1"] = np.random.rand(self.input_number, neurons_number)
-        self._wages["b1"] = np.random.rand(1, neurons_number)
-        self._wages["w2"] = np.random.rand(neurons_number, 1)
-        self._wages["b2"] = np.random.rand(1, 1)
+        self._wages["hidden_w"] = np.random.rand(self.input_number, neurons_number)
+        self._wages["hidden_b"] = np.random.rand(1, neurons_number)
+        self._wages["out_w"] = np.random.rand(neurons_number, 1)
+        self._wages["out_b"] = np.random.rand(1, 1)
 
-        self._wages["w1"] = (self._wages["w1"] - 0.5) * 2 * np.sqrt(1 / self.input_number)
-        self._wages["b1"] = (self._wages["b1"] - 0.5) * 2 * np.sqrt(1 / self.input_number)
-        self._wages["w2"] = (self._wages["w2"] - 0.5) * 2 * np.sqrt(1 / neurons_number)
-        self._wages["b2"] = (self._wages["b2"] - 0.5) * 2 * np.sqrt(1 / neurons_number)
+        self._wages["hidden_w"] = (self._wages["hidden_w"] - 0.5) * 2 * np.sqrt(1 / self.input_number)
+        self._wages["hidden_b"] = (self._wages["hidden_b"] - 0.5) * 2 * np.sqrt(1 / self.input_number)
+        self._wages["out_w"] = (self._wages["out_w"] - 0.5) * 2 * np.sqrt(1 / neurons_number)
+        self._wages["out_b"] = (self._wages["out_b"] - 0.5) * 2 * np.sqrt(1 / neurons_number)
 
     def forward_propagation(self, input_data: np.ndarray):
         result = {}
-        result["t1"] = input_data @ self._wages["w1"] + self.wages["b1"]
-        result["h1"] = self.activate(result["t1"])
-        result["z"] = result["h1"] @ self.wages["w2"] + self.wages["b2"]
+        result["hidden_s"] = input_data @ self._wages["hidden_w"] + self.wages["hidden_b"]
+        result["hidden_y"] = self.activate(result["hidden_s"])
+        result["out"] = result["hidden_y"] @ self.wages["out_w"] + self.wages["out_b"]
         return result
 
     def back_propagation(self, input: np.ndarray, output: np.ndarray, result):
         delta_wages = {}
-        delta_2 = result["z"] - output
-        delta_wages["dw2"] = result["h1"].T @ delta_2
-        delta_wages["db2"] = np.sum(delta_2, axis=0, keepdims=True)
-        delta_h1 = delta_2 @ self.wages["w2"].T
-        delta_1 = delta_h1 * self.activate.derivative(result["t1"])
-        delta_wages["dw1"] = input.T @ delta_1
-        delta_wages["db1"] = np.sum(delta_1, axis=0, keepdims=True)
+        delta_2 = result["out"] - output
+        delta_wages["delta_out_w"] = result["hidden_y"].T @ delta_2
+        delta_wages["delta_out_b"] = np.sum(delta_2, axis=0, keepdims=True)
+        delta_h1 = delta_2 @ self.wages["out_w"].T
+        delta_1 = delta_h1 * self.activate.derivative(result["hidden_s"])
+        delta_wages["delta_hidden_w"] = input.T @ delta_1
+        delta_wages["delta_hidden_b"] = np.sum(delta_1, axis=0, keepdims=True)
 
         return delta_wages
 
 
     def update_wages(self, delta_wages):
-        self._wages["w1"] -= STUDY_SPEED*delta_wages["dw1"]
-        self._wages["b1"] -= STUDY_SPEED*delta_wages["db1"]
-        self._wages["w2"] -= STUDY_SPEED*delta_wages["dw2"]
-        self._wages["b2"] -= STUDY_SPEED*delta_wages["db2"]
+        self._wages["hidden_w"] -= STUDY_SPEED*delta_wages["delta_hidden_w"]
+        self._wages["hidden_b"] -= STUDY_SPEED*delta_wages["delta_hidden_b"]
+        self._wages["out_w"] -= STUDY_SPEED*delta_wages["delta_out_w"]
+        self._wages["out_b"] -= STUDY_SPEED*delta_wages["delta_out_b"]
 
     def study(self, input_data: np.ndarray, output_data: np.ndarray):
-        total_error0 = 0
         for i in range(ITERATION_NUMBER):
             result = self.forward_propagation(input_data)
 
@@ -119,7 +118,5 @@ class SimpleAI:
             self.update_wages(self.back_propagation(input_data, output_data, result))
 
             if i % ITERATION_INFO == 0:
-                total_error = np.sum((result["z"] - output_data) ** 2)
+                total_error = np.sum((result["out"] - output_data) ** 2)
                 print(str(i) + " iterations MISTAKE:" + str(total_error))
-                total_error0 = total_error
-

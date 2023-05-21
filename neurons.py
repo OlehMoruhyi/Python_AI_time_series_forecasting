@@ -73,10 +73,10 @@ class SimpleAI:
         if not isinstance(neurons_number, int):
             raise TypeError("Neurons number must be a int")
         self._wages = {}
-        self._wages["hidden_w"] = np.random.rand(self.input_number, neurons_number)
-        self._wages["hidden_b"] = np.random.rand(1, neurons_number)
-        self._wages["out_w"] = np.random.rand(neurons_number, 1)
-        self._wages["out_b"] = np.random.rand(1, 1)
+        self._wages["hidden_w"] = np.random.random((self.input_number, neurons_number))
+        self._wages["hidden_b"] = np.random.random((1, neurons_number))
+        self._wages["out_w"] = np.random.random((neurons_number, 1))
+        self._wages["out_b"] = np.random.random((1, 1))
 
         self._wages["hidden_w"] = (self._wages["hidden_w"] - 0.5) * 2 * np.sqrt(1 / self.input_number)
         self._wages["hidden_b"] = (self._wages["hidden_b"] - 0.5) * 2 * np.sqrt(1 / self.input_number)
@@ -112,8 +112,6 @@ class SimpleAI:
     def study(self, input_data: np.ndarray, output_data: np.ndarray):
         for i in range(ITERATION_NUMBER):
             result = self.forward_propagation(input_data)
-
-
 
             self.update_wages(self.back_propagation(input_data, output_data, result))
 
